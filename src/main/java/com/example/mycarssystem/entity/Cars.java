@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Entity
 @Table(name = "cars")
-@Data // 自动生成 Getter/Setter/ToString
+@Data
 public class Cars {
 
     @Id
@@ -18,12 +18,15 @@ public class Cars {
     @Column(name = "car_type")
     private String carType;
 
-    @Column(name = "owner_name")
-    private String ownerName;
-
     @Column(unique = true)
     private String vin;
 
     @Column(name = "license_plate", unique = true)
     private String licensePlate;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    // name 是本表(cars)的字段，referencedColumnName 是对方表(users)的主键名
+    private User owner;
+
 }
