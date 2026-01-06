@@ -8,8 +8,9 @@ import lombok.Data;
 public class Cars {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "car_name", nullable = false)
     private String carName;
