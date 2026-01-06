@@ -17,7 +17,11 @@ public class CarsController {
 
     @GetMapping("/getByVin/{vin}")
     public List<Cars> getByVin(@PathVariable String vin) {
-        return carsRepository.findByVin(vin);
+        if (carsRepository.existsByVin(vin)) {
+            return carsRepository.findByVin(vin);
+        } else {
+            return null;
+        }
     }
 
     @GetMapping("/getByLicensePlate/{licensePlate}")
