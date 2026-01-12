@@ -6,18 +6,22 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, String> {
 
-    // 重点：自定义根据 VIN 删除的方法
+    // 根据身份证号删除用户
     @Transactional
     void deleteByIdCard(String idCard);
 
-    // 顺便定义一个查询，用于校验是否存在
+    // 检查身份证号是否存在
     boolean existsByIdCard(String idCard);
 
-    // 顺便定义一个查询，用于校验是否存在
+    // 根据身份证号查询用户
     List<User> findByIdCard(String idCard);
-
+    
+    // 根据ID查询用户
+    @Override
+    Optional<User> findById(String id);
 }

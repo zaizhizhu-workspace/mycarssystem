@@ -1,70 +1,86 @@
 package com.example.mycarssystem.controller;
 
+import com.example.mycarssystem.common.Result;
+import com.example.mycarssystem.dto.CarsDTO;
 import com.example.mycarssystem.entity.Cars;
-import com.example.mycarssystem.repository.CarsRepository;
+import com.example.mycarssystem.service.CarsService;
+import com.example.mycarssystem.vo.CarsVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 车辆管理控制器
+ */
 @RestController
 @RequestMapping("/api/cars")
 public class CarsController {
 
+    private final CarsService carsService;
+
     @Autowired
-    private CarsRepository carsRepository;
-
-    @GetMapping("/getByVin/{vin}")
-    public List<Cars> getByVin(@PathVariable String vin) {
-        boolean carsList = carsRepository.existsByVin(vin);
-
-
-        if (carsRepository.existsByVin(vin)) {
-            return carsRepository.findByVin(vin);
-        } else {
-            return null;
-        }
+    public CarsController(CarsService carsService) {
+        this.carsService = carsService;
     }
 
-    @GetMapping("/getByLicensePlate/{licensePlate}")
-    public List<Cars> getByLicensePlate(@PathVariable String licensePlate) {
-        return carsRepository.findByLicensePlate(licensePlate);
+    /**
+     * 根据车架号查询车辆信息
+     */
+    @GetMapping("/{vin}")
+    public ResponseEntity<CarsVO> getByVin(@PathVariable String vin) {
+        return carsService.getByVin(vin);
     }
 
-    @PostMapping("/add")
-    public String add(@RequestBody Cars car) {
-        String vin = car.getVin();
-        if (!carsRepository.existsByVin(vin)) {
-            carsRepository.save(car);
-            return "添加成功！VIN: " + vin;
-        } else {
-            return "添加失败：数据库已经存在 VIN 为 " + vin + " 的记录";
-        }
+    /**
+     * 根据车牌号查询车辆信息
+     */
+    @GetMapping("/license-plate/{licensePlate}")
+    public ResponseEntity<List<Cars>> getByLicensePlate(@PathVariable String licensePlate) {
+        return carsService.getByLicensePlate(licensePlate);
     }
 
-    @PostMapping("/delete")
-    public String deleteByVin(@RequestParam String vin) {
-        if (carsRepository.existsByVin(vin)) {
-            carsRepository.deleteByVin(vin);
-            return "删除成功！VIN: " + vin;
-        } else {
-            return "删除失败：数据库中不存在 VIN 为 " + vin + " 的记录";
-        }
+    /**
+     * 添加车辆
+     */
+    @PostMapping
+    public Result<String> add(@Validated @RequestBody CarsDTO carsDTO) {
+        return carsService.addCar(carsDTO);
     }
 
-    @PostMapping("/update")
-    public String update(@RequestBody Cars car) {
-        String vin = car.getVin();
-        if (carsRepository.existsByVin(vin)) {
-            List<Cars> carList = carsRepository.findByVin(vin);
-            // 因为已经验证过存在，并且vin唯一所以可以直接拿
-            Cars oldCar = carList.get(0);
-            car.setId(oldCar.getId());
-            carsRepository.save(car);
-            return "修改成功！VIN: " + vin;
-        } else {
-            return "修改失败：数据库中不存在 VIN 为 " + vin + " 的记录";
-        }
+    /**
+     * 删除车辆
+     */
+    @DeleteMapping("/{vin}")
+    public Result<String> deleteByVin(@PathVariable String vin) {
+        return carsService.deleteByVin(vin);
+    }
+
+    /**
+     * 更新车辆信息
+     */
+    @PutMapping("/{vin}")
+    public Result<String> update(@PathVariable String vin, @Validated @RequestBody CarsDTO carsDTO) {
+        return carsService.updateCar(vin, carsDTO);
+    }
+
+    /**
+     * 分页查询车辆列表
+     */
+    @GetMapping
+    public Result<Page<Cars>> list(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createTime") String sort,
+            @RequestParam(defaultValue = "desc") String order) {
+        Sort.Direction direction = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
+        return carsService.listCars(pageable);
     }
 }

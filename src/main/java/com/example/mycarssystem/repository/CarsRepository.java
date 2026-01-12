@@ -1,10 +1,9 @@
 package com.example.mycarssystem.repository;
 
 import com.example.mycarssystem.entity.Cars;
-import com.example.mycarssystem.vo.CarsVO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,19 +11,44 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CarsRepository extends JpaRepository<Cars, Long> {
+public interface CarsRepository extends JpaRepository<Cars, String> {
 
-    // Spring Data 会根据方法名自动生成 SQL: SELECT * FROM cars WHERE license_plate = ?
+    /**
+     * 根据车牌号查询车辆列表
+     */
     List<Cars> findByLicensePlate(String licensePlate);
 
-    // 重点：自定义根据 VIN 删除的方法
+    /**
+     * 根据VIN码删除车辆
+     */
     @Transactional
     void deleteByVin(String vin);
 
-    // 顺便定义一个查询，用于校验是否存在
+    /**
+     * 检查VIN码是否存在
+     */
     boolean existsByVin(String vin);
+    
+    /**
+     * 检查车牌号是否存在
+     */
+    boolean existsByLicensePlate(String licensePlate);
 
-    // 顺便定义一个查询，用于校验是否存在
+    /**
+     * 根据VIN码查询车辆列表
+     */
     List<Cars> findByVin(String vin);
-
+    
+    /**
+     * 获取第一个匹配VIN码的车辆
+     */
+    default Optional<Cars> findFirstByVin(String vin) {
+        return findByVin(vin).stream().findFirst();
+    }
+    
+    /**
+     * 分页查询所有车辆
+     */
+    @Override
+    Page<Cars> findAll(Pageable pageable);
 }

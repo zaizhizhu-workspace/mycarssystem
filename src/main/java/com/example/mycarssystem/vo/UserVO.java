@@ -1,6 +1,5 @@
 package com.example.mycarssystem.vo;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,21 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CarsVO {
+public class UserVO {
     private String id;
-
-    private String carName;
-
-    private String carType;
-    
-    private String vin;
-
-    private String licensePlate;
-
-    private String ownerId;
-
     private String userName;
-
     private String phoneNumber;
-
+    private String idCard;
 }
