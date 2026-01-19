@@ -24,7 +24,7 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return Result.error(400, "参数验证失败").setData(errors);
+        return Result.error(400, "参数验证失败");
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return Result.error(400, "参数绑定失败").setData(errors);
+        return Result.error(400, "参数绑定失败");
     }
 
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
