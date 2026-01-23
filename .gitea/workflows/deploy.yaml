@@ -24,11 +24,14 @@ jobs:
       - name: Build JAR
         run: |
           # 此时直接使用你刚才在宿主机 sudo apt install maven 装好的工具
-          mvn clean package -DskipTests
+          mvn clean package -DskipTests -Dmaven.repo.local=/root/.m2/repository
 
       # 第三步：直接调用宿主机 Docker (秒开)
       - name: Build and Run
         run: |
+          # 1. 换源加速 (解决 apt-get 卡顿)
+          sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
+          sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
           # 自动安装 Docker 客户端（这比手动挂载宿主机文件稳得多）
           apt-get update && apt-get install -y docker.io
           
