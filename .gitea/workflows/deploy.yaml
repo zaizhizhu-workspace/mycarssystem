@@ -29,9 +29,15 @@ jobs:
       # 第三步：直接调用宿主机 Docker (秒开)
       - name: Build and Run
         run: |
+          # 自动安装 Docker 客户端（这比手动挂载宿主机文件稳得多）
+          apt-get update && apt-get install -y docker.io
+          
+          # 检查一下
+          docker --version
           # 显式指定在当前目录构建
           docker build -t my-app:latest .
           # 停止旧容器并清理（使用 -f 强制删除更简洁）
           docker rm -f my-app-container || true
           # 启动新容器
           docker run -d --name my-app-container -p 8080:8080 my-app:latest
+          docker image prune -f
