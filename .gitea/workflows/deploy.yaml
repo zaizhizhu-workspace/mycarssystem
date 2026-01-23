@@ -13,9 +13,10 @@ jobs:
       # 第一步：手动拉取代码（不走 GitHub，走内网 Gitea）
       - name: Local Checkout
         run: |
-          # 清空当前工作目录并从 Gitea 克隆最新代码
-          git clone http://192.168.239.129:3000/$GITEA_REPOSITORY.git .
-          git checkout ${GITEA_SHA}
+          # 2. 加入用户名（建议直接写 admin 或你的账号名）和 Token
+          git clone http://admin:b318d9862d238b017860d001dd80457c150d95da@192.168.239.129:3000/${{ gitea.repository }}.git .
+          # 切换到触发本次任务的具体提交点
+          git checkout ${{ gitea.sha }}
 
       # 第二步：编译打包（使用镜像内预装的 Maven 和 JDK 21）
       - name: Build JAR
