@@ -6,7 +6,8 @@ jobs:
   build-and-run:
     # 这里的标签必须对应你在 config.yaml 里改的那个 :host
     runs-on: ubuntu-latest
-
+    container:
+      image: maven:3.9.6-eclipse-temurin-21-jammy
     steps:
       # 第一步：智能拉取代码
       - name: Checkout Code
