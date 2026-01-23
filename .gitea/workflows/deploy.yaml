@@ -1,38 +1,34 @@
 name: Java-CI-CD
-run-name: ${{ gitea.actor }} is deploying SpringBoot with JDK 21
+run-name: ${{ gitea.actor }} is deploying SpringBoot
 on: [push]
 
 jobs:
   build-and-run:
+    # 这里的标签必须对应你在 config.yaml 里改的那个 :host
     runs-on: ubuntu-latest
-    # 【关键】使用我们手动下载好的本地“工具箱”
-    container:
-      image: maven:3.9.6-eclipse-temurin-21
-    volumes:
-      - /root/.m2:/root/.m2              # 映射 Maven 仓库缓存
-      - /var/run/docker.sock:/var/run/docker.sock  # 映射 Docker 套接字
 
     steps:
-      # 第一步：手动拉取代码（不走 GitHub，走内网 Gitea）
-      - name: Local Checkout
+      # 第一步：智能拉取代码
+      - name: Checkout Code
         run: |
-          # 2. 加入用户名（建议直接写 admin 或你的账号名）和 Token
-          git clone http://${{ gitea.token }}@192.168.239.129:3000/${{ gitea.repository }}.git .
-          # 切换到触发本次任务的具体提交点
-          git checkout ${{ gitea.sha }}
+          # 如果目录不存在，就克隆；如果存在，就拉取最新代码
+          if [ -d ".git" ]; then
+            git fetch --all
+            git reset --hard origin/main
+          else
+            git clone http://${{ gitea.token }}@192.168.239.129:3000/${{ gitea.repository }}.git .
+          fi
 
-      # 第二步：编译打包（使用镜像内预装的 Maven 和 JDK 21）
+      # 第二步：直接调用宿主机编译 (秒开)
       - name: Build JAR
         run: |
+          # 此时直接使用你刚才在宿主机 sudo apt install maven 装好的工具
           mvn clean package -DskipTests
 
-      # 第三步：构建并运行容器
-      # 注意：这要求 Runner 的 docker-compose 必须挂载了 /var/run/docker.sock
-      - name: Build and Update Docker Image
+      # 第三步：直接调用宿主机 Docker (秒开)
+      - name: Build and Run
         run: |
-          # 1. 在 Debian 环境的 Maven 镜像里安装 Docker 客户端
-          apt-get update && apt-get install -y docker.io
-          # 2. 执行构建（这会通过挂载的 .sock 发送给宿主机执行）
+          # 注意：这里删掉了 apt-get install docker.io，因为宿主机自带 Docker
           docker build -t my-app:latest .
           docker stop my-app-container || true
           docker rm my-app-container || true
