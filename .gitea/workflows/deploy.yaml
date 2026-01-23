@@ -14,7 +14,7 @@ jobs:
       - name: Local Checkout
         run: |
           # 清空当前工作目录并从 Gitea 克隆最新代码
-          git clone http://192.168.239.129:3000/${GITEA_REPOSITORY}.git .
+          git clone http://192.168.239.129:3000/$GITEA_REPOSITORY.git .
           git checkout ${GITEA_SHA}
 
       # 第二步：编译打包（使用镜像内预装的 Maven 和 JDK 21）
