@@ -5,6 +5,7 @@ import com.example.mycarssystem.repository.UserRepository;
 import com.example.mycarssystem.service.UserService;
 import com.example.mycarssystem.vo.UserVO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
+    private final RedisTemplate<String, Object>  redisTemplate;
+
+
     @Override
     @Transactional(readOnly = true)
     public ResponseEntity<UserVO> getByIdCard(String idCard) {
+        // 每次查询，Redis 里的计数器就加 1
+        redisTemplate.opsForValue().increment("user_query_count");
         return userRepository.findByIdCard(idCard).stream()
                 .findFirst()
                 .map(user -> {
