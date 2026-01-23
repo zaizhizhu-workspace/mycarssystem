@@ -28,8 +28,9 @@ jobs:
       # 第三步：直接调用宿主机 Docker (秒开)
       - name: Build and Run
         run: |
-          # 注意：这里删掉了 apt-get install docker.io，因为宿主机自带 Docker
+          # 显式指定在当前目录构建
           docker build -t my-app:latest .
-          docker stop my-app-container || true
-          docker rm my-app-container || true
+          # 停止旧容器并清理（使用 -f 强制删除更简洁）
+          docker rm -f my-app-container || true
+          # 启动新容器
           docker run -d --name my-app-container -p 8080:8080 my-app:latest
