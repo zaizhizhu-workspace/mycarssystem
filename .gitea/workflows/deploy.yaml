@@ -13,14 +13,20 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '21'
-          distribution: 'temurin' # 这是一个高性能、稳定的 JDK 发行版
-          cache: maven            # 开启缓存，下次编译会快很多
+          distribution: 'temurin'
+          # 初次成功前先关闭缓存，避免路径报错干扰判断
+          # cache: maven
 
-      - name: Build JAR
-        run: mvn clean package -DskipTests
+      - name: Build JAR with Maven Wrapper
+        run: |
+          # 给 mvnw 脚本添加执行权限
+          chmod +x mvnw
+          # 使用项目自带的 mvnw 进行编译
+          ./mvnw clean package -DskipTests
 
       - name: Build and Update Docker Image
         run: |
+          # 这一步需要你的 Runner 挂载了 docker.sock 才能执行
           docker build -t my-app:latest .
           docker stop my-app-container || true
           docker rm my-app-container || true
