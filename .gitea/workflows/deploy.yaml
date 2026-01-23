@@ -1,32 +1,31 @@
 name: Java-CI-CD
-run-name: ${{ github.actor }} is deploying SpringBoot with JDK 21
+run-name: ${{ gitea.actor }} is deploying SpringBoot with JDK 21
 on: [push]
 
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
+    # 【关键】使用我们手动下载好的本地“工具箱”
+    container:
+      image: maven:3.9.6-eclipse-temurin-21-alpine
+
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          # 初次成功前先关闭缓存，避免路径报错干扰判断
-          # cache: maven
-
-      - name: Build JAR with Maven Wrapper
+      # 第一步：手动拉取代码（不走 GitHub，走内网 Gitea）
+      - name: Local Checkout
         run: |
-          # 给 mvnw 脚本添加执行权限
-          chmod +x mvnw
-          # 使用项目自带的 mvnw 进行编译
-          ./mvnw clean package -DskipTests
+          # 清空当前工作目录并从 Gitea 克隆最新代码
+          git clone http://localhost:3000/${GITEA_REPOSITORY}.git .
+          git checkout ${GITEA_SHA}
 
+      # 第二步：编译打包（使用镜像内预装的 Maven 和 JDK 21）
+      - name: Build JAR
+        run: |
+          mvn clean package -DskipTests
+
+      # 第三步：构建并运行容器
+      # 注意：这要求 Runner 的 docker-compose 必须挂载了 /var/run/docker.sock
       - name: Build and Update Docker Image
         run: |
-          # 这一步需要你的 Runner 挂载了 docker.sock 才能执行
           docker build -t my-app:latest .
           docker stop my-app-container || true
           docker rm my-app-container || true
