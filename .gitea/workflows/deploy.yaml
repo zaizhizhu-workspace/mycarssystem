@@ -29,7 +29,7 @@ jobs:
       # 第三步：直接调用宿主机 Docker (秒开)
       - name: Build and Run
         run: |
-          # 1. 换源加速 (解决 apt-get 卡顿)
+          # 换源加速 (解决 apt-get 卡顿)
           sed -i 's/archive.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
           sed -i 's/security.ubuntu.com/mirrors.aliyun.com/g' /etc/apt/sources.list
           # 自动安装 Docker 客户端（这比手动挂载宿主机文件稳得多）
@@ -37,10 +37,11 @@ jobs:
           
           # 检查一下
           docker --version
-          # 显式指定在当前目录构建
-          docker build -t my-app:latest .
           # 停止旧容器并清理（使用 -f 强制删除更简洁）
           docker rm -f my-app-container || true
+          # 显式指定在当前目录构建
+          docker build -t my-app:latest .
+          
           # 启动新容器
           docker run -d --name my-app-container -p 8080:8080 my-app:latest
           docker image prune -f
