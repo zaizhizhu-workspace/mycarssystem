@@ -8,6 +8,9 @@ jobs:
     # 【关键】使用我们手动下载好的本地“工具箱”
     container:
       image: maven:3.9.6-eclipse-temurin-21
+    volumes:
+      - /root/.m2:/root/.m2              # 映射 Maven 仓库缓存
+      - /var/run/docker.sock:/var/run/docker.sock  # 映射 Docker 套接字
 
     steps:
       # 第一步：手动拉取代码（不走 GitHub，走内网 Gitea）
