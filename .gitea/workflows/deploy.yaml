@@ -7,14 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     # 【关键】使用我们手动下载好的本地“工具箱”
     container:
-      image: maven:3.9.6-eclipse-temurin-21-alpine
+      image: maven:3.9.6-eclipse-temurin-21
 
     steps:
       # 第一步：手动拉取代码（不走 GitHub，走内网 Gitea）
       - name: Local Checkout
         run: |
           # 清空当前工作目录并从 Gitea 克隆最新代码
-          git clone http://localhost:3000/${GITEA_REPOSITORY}.git .
+          git clone http://192.168.239.129:3000/${GITEA_REPOSITORY}.git .
           git checkout ${GITEA_SHA}
 
       # 第二步：编译打包（使用镜像内预装的 Maven 和 JDK 21）
