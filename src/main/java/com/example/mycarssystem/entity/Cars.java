@@ -1,6 +1,10 @@
 package com.example.mycarssystem.entity;
+import com.example.mycarssystem.config.SnowflakeId;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import tools.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.ser.std.ToStringSerializer;
 
 @Entity
 @Table(name = "cars")
@@ -8,9 +12,10 @@ import lombok.Data;
 public class Cars {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @SnowflakeId
     @Column(name = "id", updatable = false, nullable = false)
-    private String id;
+    @JsonSerialize(using = ToStringSerializer.class) // 防止前端精度丢失
+    private Long id;
 
     @Column(name = "car_name", nullable = false)
     private String carName;
@@ -24,8 +29,8 @@ public class Cars {
     @Column(name = "license_plate", unique = true)
     private String licensePlate;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     // name 是本表(cars)的字段，referencedColumnName 是对方表(users)的主键名
     private User owner;
 
